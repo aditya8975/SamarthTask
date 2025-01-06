@@ -1,0 +1,45 @@
+{
+    "Maharashtra": {
+      "Mumbai": {
+        "Andheri": [
+          { "village": "Versova", "pincode": "400061" },
+          { "village": "DN Nagar", "pincode": "400058" }
+        ],
+        "Borivali": [
+          { "village": "Kandarpada", "pincode": "400066" },
+          { "village": "Gorai", "pincode": "400092" }
+        ]
+      },
+      "Pune": {
+        "Haveli": [
+          { "village": "Wadgaon", "pincode": "412207" },
+          { "village": "Uruli", "pincode": "412202" }
+        ],
+        "Baramati": [
+          { "village": "Bhigwan", "pincode": "413130" },
+          { "village": "Nira", "pincode": "412102" }
+        ]
+      }
+    },
+    "Karnataka": {
+      "Bangalore": {
+        "Yelahanka": [
+          { "village": "Devanahalli", "pincode": "562110" },
+          { "village": "Jakkur", "pincode": "560064" }
+        ],
+        "Anekal": [
+          { "village": "Attibele", "pincode": "562107" },
+          { "village": "Chandapura", "pincode": "562106" }
+        ]
+      }
+    },
+    "Tamil Nadu": {
+      "Chennai": {
+        "Guindy": [
+          { "village": "Velachery", "pincode": "600042" },
+          { "village": "Saidapet", "pincode": "600015" }
+        ]
+      }
+    }
+  }
+  
