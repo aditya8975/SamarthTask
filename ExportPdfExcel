@@ -1,0 +1,145 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import "./displayShiksa.css";
+
+const DisplayShiksha = () => {
+  const [shiksha, setShiksha] = useState([]);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:8000/api/shiksha")
+      .then((response) => {
+        setShiksha(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching schools data", error);
+      });
+  }, []);
+
+  if (!shiksha || shiksha.length === 0) {
+    return <div>Loading...</div>;
+  }
+
+  // Function to Export Data to PDF
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Schools Data", 20, 10);
+    
+    const tableData = shiksha.flatMap((school) => {
+      let rows = [];
+      
+      // Government Schools
+      if (school.Goverment.exists) {
+        rows.push([
+          school.nameOfSurveyor, school.country, school.village, school.state, school.district, school.pincode,
+          "Government", school.Goverment.name, school.Goverment.category, school.Goverment.medium,
+          school.Goverment.principal?.name, school.Goverment.principal?.contact,
+          school.Goverment.smcMember?.name, school.Goverment.smcMember?.contact,
+          school.Goverment.students?.girls, school.Goverment.students?.boys,
+          `4th: ${school.Goverment.classes?.fourth}, 5th: ${school.Goverment.classes?.fifth}, 8th: ${school.Goverment.classes?.eighth}, 10th: ${school.Goverment.classes?.tenth}`
+        ]);
+      }
+      
+      // Private Schools
+      if (school.Private.exists) {
+        rows.push([
+          school.nameOfSurveyor, school.country, school.village, school.state, school.district, school.pincode,
+          "Private", school.Private.name, school.Private.category, school.Private.medium,
+          school.Private.principal?.name, school.Private.principal?.contact,
+          school.Private.smcMember?.name, school.Private.smcMember?.contact,
+          school.Private.students?.girls, school.Private.students?.boys,
+          `4th: ${school.Private.classes?.fourth}, 5th: ${school.Private.classes?.fifth}, 8th: ${school.Private.classes?.eighth}, 10th: ${school.Private.classes?.tenth}`
+        ]);
+      }
+      
+      // Ashram Schools
+      if (school.ashram.exists) {
+        rows.push([
+          school.nameOfSurveyor, school.country, school.village, school.state, school.district, school.pincode,
+          "Ashram", school.ashram.name, school.ashram.category, school.ashram.medium,
+          school.ashram.principal?.name, school.ashram.principal?.contact,
+          school.ashram.smcMember?.name, school.ashram.smcMember?.contact,
+          school.ashram.students?.girls, school.ashram.students?.boys,
+          `4th: ${school.ashram.classes?.fourth}, 5th: ${school.ashram.classes?.fifth}, 8th: ${school.ashram.classes?.eighth}, 10th: ${school.ashram.classes?.tenth}`
+        ]);
+      }
+      
+      return rows;
+    });
+
+    doc.autoTable({
+      head: [["Surveyor Name", "Country", "Village", "State", "District", "Pincode", "Type", "School Name", "Category", "Medium", "Principal Name", "Principal Contact", "SMC Name", "SMC Contact", "Girls", "Boys", "Classes"]],
+      body: tableData,
+    });
+
+    doc.save("Schools_Data.pdf");
+  };
+
+  // Function to Export Data to Excel
+  const exportToExcel = () => {
+    const worksheetData = shiksha.flatMap((school) => {
+      let rows = [];
+      
+      if (school.Goverment.exists) {
+        rows.push({
+          "Surveyor Name": school.nameOfSurveyor, Country: school.country, Village: school.village,
+          State: school.state, District: school.district, Pincode: school.pincode,
+          "Type": "Government", "School Name": school.Goverment.name, Category: school.Goverment.category,
+          Medium: school.Goverment.medium, "Principal Name": school.Goverment.principal?.name,
+          "Principal Contact": school.Goverment.principal?.contact, "SMC Name": school.Goverment.smcMember?.name,
+          "SMC Contact": school.Goverment.smcMember?.contact, "Girls": school.Goverment.students?.girls,
+          "Boys": school.Goverment.students?.boys, "Classes": `4th: ${school.Goverment.classes?.fourth}, 5th: ${school.Goverment.classes?.fifth}, 8th: ${school.Goverment.classes?.eighth}, 10th: ${school.Goverment.classes?.tenth}`
+        });
+      }
+      
+      if (school.Private.exists) {
+        rows.push({
+          "Surveyor Name": school.nameOfSurveyor, Country: school.country, Village: school.village,
+          State: school.state, District: school.district, Pincode: school.pincode,
+          "Type": "Private", "School Name": school.Private.name, Category: school.Private.category,
+          Medium: school.Private.medium, "Principal Name": school.Private.principal?.name,
+          "Principal Contact": school.Private.principal?.contact, "SMC Name": school.Private.smcMember?.name,
+          "SMC Contact": school.Private.smcMember?.contact, "Girls": school.Private.students?.girls,
+          "Boys": school.Private.students?.boys, "Classes": `4th: ${school.Private.classes?.fourth}, 5th: ${school.Private.classes?.fifth}, 8th: ${school.Private.classes?.eighth}, 10th: ${school.Private.classes?.tenth}`
+        });
+      }
+      
+      if (school.ashram.exists) {
+        rows.push({
+          "Surveyor Name": school.nameOfSurveyor, Country: school.country, Village: school.village,
+          State: school.state, District: school.district, Pincode: school.pincode,
+          "Type": "Ashram", "School Name": school.ashram.name, Category: school.ashram.category,
+          Medium: school.ashram.medium, "Principal Name": school.ashram.principal?.name,
+          "Principal Contact": school.ashram.principal?.contact, "SMC Name": school.ashram.smcMember?.name,
+          "SMC Contact": school.ashram.smcMember?.contact, "Girls": school.ashram.students?.girls,
+          "Boys": school.ashram.students?.boys, "Classes": `4th: ${school.ashram.classes?.fourth}, 5th: ${school.ashram.classes?.fifth}, 8th: ${school.ashram.classes?.eighth}, 10th: ${school.ashram.classes?.tenth}`
+        });
+      }
+      
+      return rows;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Schools Data");
+
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+    saveAs(data, "Schools_Data.xlsx");
+  };
+
+  return (
+    <div className="container">
+      <h2>Schools Data</h2>
+      <button onClick={exportToPDF}>Export to PDF</button>
+      <button onClick={exportToExcel}>Export to Excel</button>
+    </div>
+  );
+};
+
+export default DisplayShiksha;
